@@ -3,51 +3,22 @@ import React, { useState, useEffect } from 'react';
 import ProductCard from '@/components/ProductCard';
 import { Product } from '@/types/product';
 
-const dummyProducts = [
-  {
-    id: '1',
-    name: 'Product 1',
-    price: 29.99,
-    description: 'This is a great product.',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-  {
-    id: '2',
-    name: 'Product 2',
-    price: 49.99,
-    description: 'This product is even better!',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-  {
-    id: '3',
-    name: 'Product 3',
-    price: 19.99,
-    description: 'An affordable option for everyone.',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-];
-
 const ProductsPublicPage: React.FC = () => {
-  const [loading, setLoading] = useState(true);
-
+  const [products, setProducts] = useState<Product[]>([]);
+  
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 1000); // Simulate loading time
-    return () => clearTimeout(timer);
+    fetchProducts();
   }, []);
-
-  const handleAddToCart = (product: Product) => {
-    console.log(`Added to cart: ${product.name}`);
-    // You can implement further cart logic here
+  const fetchProducts = async () => {
+    try {
+      const res = await fetch("http://localhost:3001/api/products");
+      if (!res.ok) throw new Error("Failed to fetch products");
+      const data = await res.json();
+      setProducts(data.data); 
+    } catch (err) {
+      console.error(err);
+    }
   };
-
-  if (loading) {
-    return <div className="text-center">Loading products...</div>;
-  }
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
@@ -57,11 +28,14 @@ const ProductsPublicPage: React.FC = () => {
           <p className="text-gray-600 mt-2">Explore our range of products</p>
         </div>
 
+        {
+        products && 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-          {dummyProducts.map(product => (
-            <ProductCard key={product.id} product={product} onAddToCart={handleAddToCart} />
+          {products.map(product => (
+            <ProductCard key={product.id} product={product} />
           ))}
         </div>
+        }
       </div>
     </div>
   );
