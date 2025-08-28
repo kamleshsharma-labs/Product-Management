@@ -19,7 +19,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         <div className="absolute top-4 right-4 w-8 h-8 bg-blue-200 rounded-full animate-float-1"></div>
         <div className="absolute bottom-4 left-4 w-6 h-6 bg-purple-200 rounded-full animate-float-2"></div>
         <img 
-          src="https://upload.wikimedia.org/wikipedia/commons/1/15/Red_Apple.jpg" 
+          src={product.imagePath ? `http://localhost:3001${product.imagePath}` : "https://upload.wikimedia.org/wikipedia/commons/1/15/Red_Apple.jpg"} 
           alt={product.name}
           className="w-full h-full object-cover transform hover:scale-110 transition-transform duration-500"
         />

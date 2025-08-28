@@ -1,10 +1,40 @@
 import express, { Request, Response } from 'express';
+import multer from 'multer';
+import path from 'path';
+import fs from 'fs';
 import Products, { IProducts } from '../models/allProduct';
 
 const router = express.Router();
+const uploadDir = path.join(__dirname, '../../uploads');
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, uploadDir);
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
+  }
+});
+
+const upload = multer({ 
+  storage: storage,
+  limits: {
+    fileSize: 5 * 1024 * 1024 
+  },
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype.startsWith('image/')) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only image files are allowed'));
+    }
+  }
+});
 
 // POST 
-router.post('/', async (req: Request, res: Response) => {
+router.post('/', upload.single('image'), async (req: Request, res: Response) => {
   try {
     const { name, price, description } = req.body;
     console.log("checking req.body : ",req.body);
@@ -12,11 +42,17 @@ router.post('/', async (req: Request, res: Response) => {
     if (!name || !price ) {
       return res.status(400).json({ message: "Missing required fields" });
     }
-    const newProdcut: IProducts = new Products({
+    
+    const productData: any = {
       name,
       price,
       description
-    });
+    };
+    if (req.file) {
+      productData.imagePath = `/uploads/${req.file.filename}`;
+    }
+    
+    const newProdcut: IProducts = new Products(productData);
     const savedProduct = await newProdcut.save();
 
     res.status(201).json({

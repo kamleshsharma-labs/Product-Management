@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { CreateProductRequest, FormErrors } from '@/types/product';
 
 
@@ -15,6 +15,8 @@ const AddProductForm: React.FC<AddProductFormProps> = ({ onProductAdded }) => {
   const [errors, setErrors] = useState<FormErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [message, setMessage] = useState<string>('');
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const validateForm = (): boolean => {
     const newErrors: FormErrors = {};
@@ -39,21 +41,34 @@ const AddProductForm: React.FC<AddProductFormProps> = ({ onProductAdded }) => {
     setIsSubmitting(true);
     setMessage('');
     try {
+      const formDataToSend = new FormData();
+      formDataToSend.append('name', formData.name);
+      formDataToSend.append('price', formData.price.toString());
+      if (formData.description) {
+        formDataToSend.append('description', formData.description);
+      }
+      if (formData.image) {
+        formDataToSend.append('image', formData.image);
+      }
       const res = await fetch('http://localhost:3001/api/products',{
         method:"POST",
-        headers:{ 'Content-Type':"application/json"},
-        body:JSON.stringify({
-          name:formData.name,
-          price:formData.price,
-          description:formData.description
-        })
+        body: formDataToSend,
       });
       if(res.ok){
+
         setFormData({ name: '', price: 0, description: '' });
+        setImagePreview(null);
+        if (fileInputRef.current) {
+          fileInputRef.current.value = '';
+        }
         setMessage('Product added successfully!');
+        window.location.href = '/profile';
+        if (onProductAdded) {
+          onProductAdded();
+        }
       }
     } catch (error) {
-      console.log("Something went wrong. Please try again.");
+      setMessage('Error adding product. Please try again.');
     } 
     setIsSubmitting(false);
   };
@@ -64,10 +79,39 @@ const AddProductForm: React.FC<AddProductFormProps> = ({ onProductAdded }) => {
       ...prev,
       [name]: name === 'price' ? parseFloat(value) || 0 : value,
     }));
-
-    // Clear error when user starts typing
     if (errors[name as keyof FormErrors]) {
       setErrors(prev => ({ ...prev, [name]: undefined }));
+    }
+  };
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = (e.target.files && e.target.files.length > 0) ? e.target.files[0] : undefined;
+    if (file) {
+      setFormData(prev => ({
+        ...prev,
+        image: file,
+      }));
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        image: undefined,
+      }));
+      setImagePreview(null);
+    }
+  };
+  const removeImage = () => {
+    setFormData(prev => ({
+      ...prev,
+      image: undefined,
+    }));
+    setImagePreview(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
     }
   };
 
@@ -126,6 +170,37 @@ const AddProductForm: React.FC<AddProductFormProps> = ({ onProductAdded }) => {
             className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
             placeholder="Enter product description (optional)"
           />
+        </div>
+
+        <div>
+          <label htmlFor="image" className="block text-sm font-medium text-gray-700">
+            Product Image
+          </label>
+          <input
+            type="file"
+            id="image"
+            name="image"
+            ref={fileInputRef}
+            onChange={handleImageChange}
+            accept="image/*"
+            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+          />
+          {imagePreview && (
+            <div className="mt-2 relative inline-block">
+              <img 
+                src={imagePreview} 
+                alt="Preview" 
+                className="w-32 h-32 object-cover rounded-md border"
+              />
+              <button
+                type="button"
+                onClick={removeImage}
+                className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs"
+              >
+                ×
+              </button>
+            </div>
+          )}
         </div>
 
         <button
