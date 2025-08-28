@@ -1,0 +1,149 @@
+import React, { useState } from 'react';
+import { CreateProductRequest, FormErrors } from '@/types/product';
+
+
+interface AddProductFormProps {
+  onProductAdded?: () => void;
+}
+
+const AddProductForm: React.FC<AddProductFormProps> = ({ onProductAdded }) => {
+  const [formData, setFormData] = useState<CreateProductRequest>({
+    name: '',
+    price: 0,
+    description: '',
+  });
+  const [errors, setErrors] = useState<FormErrors>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [message, setMessage] = useState<string>('');
+
+  const validateForm = (): boolean => {
+    const newErrors: FormErrors = {};
+
+    if (!formData.name.trim()) {
+      newErrors.name = 'Product name is required';
+    }
+
+    if (formData.price <= 0) {
+      newErrors.price = 'Price must be a positive number';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!validateForm()) {
+      return;
+    }
+    setIsSubmitting(true);
+    setMessage('');
+    try {
+      const res = await fetch('http://localhost:3001/api/products',{
+        method:"POST",
+        headers:{ 'Content-Type':"application/json"},
+        body:JSON.stringify({
+          name:formData.name,
+          price:formData.price,
+          description:formData.description
+        })
+      });
+      if(res.ok){
+        setFormData({ name: '', price: 0, description: '' });
+        setMessage('Product added successfully!');
+      }
+    } catch (error) {
+      console.log("Something went wrong. Please try again.");
+    } 
+    setIsSubmitting(false);
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: name === 'price' ? parseFloat(value) || 0 : value,
+    }));
+
+    // Clear error when user starts typing
+    if (errors[name as keyof FormErrors]) {
+      setErrors(prev => ({ ...prev, [name]: undefined }));
+    }
+  };
+
+  return (
+    <div className="p-4">
+      <h2 className="text-2xl font-bold mb-4">Add New Product</h2>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+            Product Name *
+          </label>
+          <input
+            type="text"
+            id="name"
+            name="name"
+            value={formData.name}
+            onChange={handleInputChange}
+            className={`mt-1 block w-full px-3 py-2 border ${
+              errors.name ? 'border-red-500' : 'border-gray-300'
+            } rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500`}
+            placeholder="Enter product name"
+          />
+          {errors.name && <p className="mt-1 text-sm text-red-600">{errors.name}</p>}
+        </div>
+
+        <div>
+          <label htmlFor="price" className="block text-sm font-medium text-gray-700">
+            Price *
+          </label>
+          <input
+            type="number"
+            id="price"
+            name="price"
+            value={formData.price}
+            onChange={handleInputChange}
+            step="0.01"
+            min="0"
+            className={`mt-1 block w-full px-3 py-2 border ${
+              errors.price ? 'border-red-500' : 'border-gray-300'
+            } rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500`}
+            placeholder="Enter price"
+          />
+          {errors.price && <p className="mt-1 text-sm text-red-600">{errors.price}</p>}
+        </div>
+
+        <div>
+          <label htmlFor="description" className="block text-sm font-medium text-gray-700">
+            Description
+          </label>
+          <textarea
+            id="description"
+            name="description"
+            value={formData.description}
+            onChange={handleInputChange}
+            rows={3}
+            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            placeholder="Enter product description (optional)"
+          />
+        </div>
+
+        <button
+          type="submit"
+          disabled={isSubmitting}
+          className="w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50"
+        >
+          {isSubmitting ? 'Adding Product...' : 'Add Product'}
+        </button>
+
+        {message && (
+          <p className={`text-sm ${message.includes('Error') ? 'text-red-600' : 'text-green-600'}`}>
+            {message}
+          </p>
+        )}
+      </form>
+    </div>
+  );
+};
+
+export default AddProductForm;
