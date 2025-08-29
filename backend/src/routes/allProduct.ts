@@ -3,6 +3,7 @@ import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
 import Products, { IProducts } from '../models/allProduct';
+import { authenticateToken } from '../middleware/authMiddleware';
 
 const router = express.Router();
 const uploadDir = path.join(__dirname, '../../uploads');
@@ -33,8 +34,7 @@ const upload = multer({
   }
 });
 
-// POST 
-router.post('/', upload.single('image'), async (req: Request, res: Response) => {
+router.post('/', authenticateToken, upload.single('image'), async (req: Request, res: Response) => {
   try {
     const { name, price, description, user } = req.body; // note: user, not users
     console.log("checking req.body : ", req.body);
@@ -99,7 +99,7 @@ router.get('/:id', async (req: Request, res: Response) => {
     }
 });
 
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", authenticateToken, async (req, res) => {
   const { id } = req.params;
   try {
     const product = await Products.findById(id);
@@ -114,7 +114,7 @@ router.delete("/:id", async (req, res) => {
   }
 });
 
-router.put("/:id", upload.single('image'), async (req, res) => {
+router.put("/:id", authenticateToken, upload.single('image'), async (req, res) => {
   const { id } = req.params;
   try {
     const { name, price, description } = req.body;    

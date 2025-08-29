@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
-import { CreateProductRequest, FormErrors } from '@/types/product';
+import { CreateProductRequest, FormErrors,UserInProduct } from '@/types/product';
 import { X } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 
 
@@ -14,16 +15,40 @@ const AddProductForm: React.FC<AddProductFormProps> = ({ productId, onProductAdd
     name: '',
     price: 0,
     description: '',
+    users: {
+      _id: "",
+      _ref: "users",
+      name: ""
+    }
   });
   const [errors, setErrors] = useState<FormErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [message, setMessage] = useState<string>('');
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [user, setUser] = useState<UserInProduct>();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const route = useRouter()
+
+  React.useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      const userData = JSON.parse(storedUser);
+      setUser({
+        name: `${userData.firstName} ${userData.lastName}`,
+        _id: userData.id,
+        _ref: "users"
+      });
+    }
+  }, []);
 
   React.useEffect(() => {
     if (productId) {
-      fetch(`http://localhost:3001/api/products/${productId}`)
+      const token = localStorage.getItem('token');
+      fetch(`http://localhost:3001/api/products/${productId}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      })
         .then(res => {
           if (!res.ok) throw new Error('Failed to fetch product');
           return res.json();
@@ -34,6 +59,11 @@ const AddProductForm: React.FC<AddProductFormProps> = ({ productId, onProductAdd
             name: product.name || '',
             price: product.price || 0,
             description: product.description || '',
+            users: {
+              name: user ? user.name : '',
+              _id: user ? user._id : '',
+              _ref: 'users'
+            }
           });
           if (product.imageUrl) {
             setImagePreview(product.imageUrl);
@@ -61,6 +91,7 @@ const AddProductForm: React.FC<AddProductFormProps> = ({ productId, onProductAdd
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
+    console.log("user and form data :: ",user,formData);
     e.preventDefault();
     if (!validateForm()) {
       return;
@@ -76,21 +107,39 @@ const AddProductForm: React.FC<AddProductFormProps> = ({ productId, onProductAdd
       }
       if (formData.image) {
         formDataToSend.append('image', formData.image);
-      }
+      }      
+      if (user) {
+        formDataToSend.append(
+          'user',
+          JSON.stringify({
+            name: user.name,
+            _id: user._id,
+            _ref: "users"
+          })
+        );
+      } else {
+      console.log("checking final object ::",formDataToSend);
+    }
+      
       const method = productId ? 'PUT' : 'POST';
       const url = productId ? `http://localhost:3001/api/products/${productId}` : 'http://localhost:3001/api/products';
+      const token = localStorage.getItem('token');
       const res = await fetch(url, {
         method,
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
         body: formDataToSend,
       });
       if (res.ok) {
-        setFormData({ name: '', price: 0, description: '' });
+        setFormData({ name: '', price: 0, description: '',users: { name: '', _id: '',_ref: 'users'}
+         });
         setImagePreview(null);
         if (fileInputRef.current) {
           fileInputRef.current.value = '';
         }
         setMessage(productId ? 'Product updated successfully!' : 'Product added successfully!');
-        window.location.href = '/profile';
+        route.push('/profile');
         if (onProductAdded) {
           onProductAdded();
         }
@@ -144,6 +193,7 @@ const AddProductForm: React.FC<AddProductFormProps> = ({ productId, onProductAdd
       fileInputRef.current.value = '';
     }
   };
+console.log("checking user data ::: ",user);
 
   return (
     <div className="p-4">

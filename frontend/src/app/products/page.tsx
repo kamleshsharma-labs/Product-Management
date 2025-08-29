@@ -1,12 +1,17 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import AddProductForm from '@/components/AddProductForm';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
+import { requireAuth } from '@/utils/auth';
 
 const ProductsPage =()=>{
   const searchParams = useSearchParams();
   const productId = searchParams.get('id');
+  const router = useRouter();
+  useEffect(() => {
+    requireAuth(router);
+  }, [router]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-10">

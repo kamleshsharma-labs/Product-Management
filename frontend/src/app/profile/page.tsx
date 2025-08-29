@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { Product, UserFormEdit } from '@/types/product';
 import { useRouter } from 'next/navigation';
 import { X } from 'lucide-react';
+import { requireAuth } from '@/utils/auth';
 
 const ProfilePage = () => {
   const [user, setUser] = useState({
@@ -26,11 +27,17 @@ const ProfilePage = () => {
   const usStates = ['Alabama', 'Alaska', 'Arizona', 'Arkansas', 'California', 'Colorado', 'Connecticut', 'Delaware', 'Florida', 'Georgia'];
 
   useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
-  }, []);
+    const checkAuth = async () => {
+      const isAuthenticated = await requireAuth(router);
+      if (isAuthenticated) {
+        const storedUser = localStorage.getItem('user');
+        if (storedUser) {
+          setUser(JSON.parse(storedUser));
+        }
+      }
+    };
+    checkAuth();
+  }, [router]);
   useEffect(() => {
     fetchProducts();
   }, []);
