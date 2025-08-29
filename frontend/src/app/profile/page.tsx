@@ -66,9 +66,13 @@ const ProfilePage = () => {
     }
   };
 
-  const handleDeleteProduct = async (id: string) => {
+  const handleDeleteProduct = async (id: any) => {
+    const token = localStorage.getItem('token');
     fetch(`http://localhost:3001/api/products/${id}`, {
       method: "DELETE",
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
     }).then((res) => res.json())
       .then((data) => {
         fetchProducts()
@@ -211,8 +215,8 @@ const ProfilePage = () => {
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">₹{product.price}</td>
                             <td className="px-6 py-4 text-sm text-gray-900">{product.description || "No description"}</td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                              <button onClick={() => handleEditProduct(product.id)} className="text-blue-600 hover:text-blue-900 mr-4">Edit</button>
-                              <button onClick={() => handleDeleteProduct(product.id)} className="text-red-600 hover:text-red-900">Delete</button>
+                              <button onClick={() => handleEditProduct(product._id)} className="text-blue-600 hover:text-blue-900 mr-4">Edit</button>
+                              <button onClick={() => handleDeleteProduct(product._id)} className="text-red-600 hover:text-red-900">Delete</button>
                             </td>
                         </tr>
                       ))}

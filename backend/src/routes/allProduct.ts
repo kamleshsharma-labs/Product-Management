@@ -129,6 +129,8 @@ router.get('/:id', async (req: Request, res: Response) => {
 
 router.delete("/:id", authenticateToken, async (req, res) => {
   const { id } = req.params;
+  console.log("checking :: id",id);
+  
   try {
     const product = await Products.findById(id);
     if (!product) {
