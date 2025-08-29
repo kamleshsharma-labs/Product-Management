@@ -36,25 +36,36 @@ const upload = multer({
 // POST 
 router.post('/', upload.single('image'), async (req: Request, res: Response) => {
   try {
-    const { name, price, description } = req.body;
-    console.log("checking req.body : ",req.body);
-    
-    if (!name || !price ) {
+    const { name, price, description, user } = req.body; // note: user, not users
+    console.log("checking req.body : ", req.body);
+
+    if (!name || !price) {
       return res.status(400).json({ message: "Missing required fields" });
     }
-    
+    let usersData;
+    if (user) {
+      try {
+        usersData = JSON.parse(user);
+      } catch (err) {
+        return res.status(400).json({ message: "Invalid user data" });
+      }
+    } else {
+      return res.status(400).json({ message: "User is required" });
+    }
     const productData: any = {
       name,
       price,
-      description
+      description,
+      users: usersData, 
     };
     if (req.file) {
       productData.imagePath = `/uploads/${req.file.filename}`;
     }
-    
-    const newProdcut: IProducts = new Products(productData);
-    const savedProduct = await newProdcut.save();
 
+    const newProduct: IProducts = new Products(productData);
+    console.log("checking newProduct ::", newProduct);
+
+    const savedProduct = await newProduct.save();
     res.status(201).json({
       message: "Product submitted successfully",
       data: savedProduct,
@@ -74,7 +85,6 @@ router.get('/', async (req: Request, res : Response)=>{
     }
 })
 
-// GET single product by ID
 router.get('/:id', async (req: Request, res: Response) => {
     try {
         const { id } = req.params;

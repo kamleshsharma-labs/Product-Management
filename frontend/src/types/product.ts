@@ -8,11 +8,18 @@ export interface Product {
   updatedAt: string;
 }
 
+export interface UserInProduct {
+  name:string,
+  _id:string,
+  _ref:string
+}
+
 export interface CreateProductRequest {
   name: string;
   price: number;
   description?: string;
   image?: File;
+  users:UserInProduct
 }
 
 

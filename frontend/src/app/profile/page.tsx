@@ -16,7 +16,6 @@ const ProfilePage = () => {
     state: ''
   });
   const [products, setProducts] = useState<Product[]>([]);
-  const [error, setError] = useState('');
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
   const [updateFormData, setUpdateFormData] = useState<UserFormEdit>({});
   const [updateError, setUpdateError] = useState('');
@@ -24,7 +23,6 @@ const ProfilePage = () => {
   const router = useRouter();
 
   const countries = ['United States', 'Canada', 'United Kingdom', 'Australia', 'India', 'Germany', 'France', 'Japan', 'Brazil', 'Mexico'];
-
   const usStates = ['Alabama', 'Alaska', 'Arizona', 'Arkansas', 'California', 'Colorado', 'Connecticut', 'Delaware', 'Florida', 'Georgia'];
 
   useEffect(() => {
@@ -119,10 +117,10 @@ const ProfilePage = () => {
   };
 
   if (!user) {
-    window.location.href = "/login";
+    router.push("/login")
     return null;
   }
-  console.log("checking user infor ::: ", products);
+  console.log("checking user infor ::: user", user);
 
   return (
     <div className="min-h-screen bg-gray-50">
