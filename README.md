@@ -119,8 +119,6 @@ The application uses the following mock API endpoints:
 - **Node.js** - Icons
 
 
-## Backend (make sure mongod db connected and port set to (http://localhost:3001/))
 
 ## License
-
 This project is open source and available under the MIT License.
