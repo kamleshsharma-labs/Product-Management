@@ -89,7 +89,6 @@ router.post('/login', async (req: Request, res: Response) => {
   }
 });
 
-// Verify token endpoint
 router.post('/verify', async (req: Request, res: Response) => {
   const { token } = req.body;
   
@@ -132,7 +131,6 @@ router.get('/profile', async (req: Request, res: Response) => {
   }
 });
 
-// Update user profile
 router.put('/profile', async (req: Request, res: Response) => {
   const token = req.headers.authorization?.split(' ')[1];
   if (!token) {
