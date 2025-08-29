@@ -2,6 +2,7 @@ import express, { Request, Response } from 'express';
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
+import mongoose from 'mongoose';
 import Products, { IProducts } from '../models/allProduct';
 import { authenticateToken } from '../middleware/authMiddleware';
 
@@ -78,12 +79,39 @@ router.post('/', authenticateToken, upload.single('image'), async (req: Request,
 
 router.get('/', async (req: Request, res : Response)=>{
     try{
-        const products = await Products.find()
+        const userId = req.query.userId as string | undefined;
+        let products;
+        if (userId) {
+            products = await Products.find({ 'users._id': userId });
+        } else {
+            products = await Products.find();
+        }
         res.json({data: products})
-    }catch{
+    }catch(err){
+        console.error("Failed to fetch product", err);
         res.status(500).json("Failed to fetch product")
     }
 })
+
+router.get('/user/:userId', async (req: Request, res: Response) => {
+    try {
+        const { userId } = req.params;
+        console.log("checking user id :::",userId);
+        
+        let query: any = { 'users._id': userId };
+        try {
+            const objectId = new mongoose.Types.ObjectId(userId);
+            query = { 'users._id': objectId };
+        } catch (err) {
+            query = { 'users._id': userId };
+        }
+        const products = await Products.find(query);
+        res.json({ data: products });
+    } catch (err) {
+        console.error("Failed to fetch products by userId :::: ", err);
+        res.status(500).json({ message: "Failed to fetch products by userId" });
+    }
+});
 
 router.get('/:id', async (req: Request, res: Response) => {
     try {

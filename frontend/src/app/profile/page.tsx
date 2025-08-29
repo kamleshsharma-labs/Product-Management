@@ -43,7 +43,21 @@ const ProfilePage = () => {
   }, []);
   const fetchProducts = async () => {
     try {
-      const res = await fetch("http://localhost:3001/api/products");
+      const storedUser = localStorage.getItem('user');
+      if (!storedUser) {
+        console.error("No user found in localStorage");
+        return;
+      }
+      
+      const userData = JSON.parse(storedUser);
+      const userId = userData.id;
+      
+      if (!userId) {
+        console.error("No user ID found in user data");
+        return;
+      }
+      
+      const res = await fetch(`http://localhost:3001/api/products/user/${userId}`);
       if (!res.ok) throw new Error("Failed to fetch products");
       const data = await res.json();
       setProducts(data.data);
@@ -52,7 +66,7 @@ const ProfilePage = () => {
     }
   };
 
-  const handleDeleteProduct = async (id: object) => {
+  const handleDeleteProduct = async (id: string) => {
     fetch(`http://localhost:3001/api/products/${id}`, {
       method: "DELETE",
     }).then((res) => res.json())
@@ -193,13 +207,13 @@ const ProfilePage = () => {
                     <tbody className="bg-white divide-y divide-gray-200">
                       {products.map((product, index) => (
                         <tr key={index}>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{product.name}</td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">₹{product.price}</td>
-                          <td className="px-6 py-4 text-sm text-gray-900">{product.description || "No description"}</td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                            <button onClick={() => handleEditProduct(product._id)} className="text-blue-600 hover:text-blue-900 mr-4">Edit</button>
-                            <button onClick={() => handleDeleteProduct(product._id)} className="text-red-600 hover:text-red-900">Delete</button>
-                          </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{product.name}</td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">₹{product.price}</td>
+                            <td className="px-6 py-4 text-sm text-gray-900">{product.description || "No description"}</td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                              <button onClick={() => handleEditProduct(product.id)} className="text-blue-600 hover:text-blue-900 mr-4">Edit</button>
+                              <button onClick={() => handleDeleteProduct(product.id)} className="text-red-600 hover:text-red-900">Delete</button>
+                            </td>
                         </tr>
                       ))}
                     </tbody>
