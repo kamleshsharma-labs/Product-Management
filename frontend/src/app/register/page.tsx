@@ -39,10 +39,54 @@ export default function Register() {
     return password.length >= minLength && hasUpperCase && hasLowerCase && hasNumbers && hasSpecialChar;
   };
 
+  const validationFormData = (formData: any): string | null => {
+    if (!formData.firstName || !formData.firstName.trim()) {
+      return 'First name is required';
+    }if (!formData.lastName || !formData.lastName.trim()) {
+      return 'Last name is required';
+    }if (!formData.email || !formData.email.trim()) {
+      return 'Email is required';
+    }if (!formData.password || !formData.password.trim()) {
+      return 'Password is required';
+    }if (!formData.confirmPassword || !formData.confirmPassword.trim()) {
+      return 'Confirm password is required';
+    }
+    
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      return 'Please enter a valid email address';
+    }
+    
+    if (formData.phone && formData.phone.trim()) {
+      const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/;
+      if (!phoneRegex.test(formData.phone.replace(/[\s\-\(\)]/g, ''))) {
+        return 'Please enter a valid phone number';
+      }
+    }
+    if (formData.dateOfBirth) {
+      const dob = new Date(formData.dateOfBirth);
+      const today = new Date();
+      const minAgeDate = new Date();
+      minAgeDate.setFullYear(today.getFullYear() - 13); 
+      if (dob > today) {
+        return 'Date of birth cannot be in the future';
+      }
+      if (dob > minAgeDate) {
+        return 'You must be at least 13 years old to register';
+      }
+    }
+    return null; 
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setSuccess('');
+    const validationError = validationFormData(formData);
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
     
     if (!agreeTerms) {
       setError('You must agree to the Terms of Service');
@@ -133,7 +177,6 @@ export default function Register() {
                         className="w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                         value={formData.firstName}
                         onChange={handleChange}
-                        required
                       />
                     </div>
                   </div>
@@ -151,7 +194,6 @@ export default function Register() {
                         className="w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                         value={formData.lastName}
                         onChange={handleChange}
-                        required
                       />
                     </div>
                   </div>
@@ -170,7 +212,7 @@ export default function Register() {
                       className="w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                       value={formData.email}
                       onChange={handleChange}
-                      required
+                      
                     />
                   </div>
                 </div>
@@ -189,7 +231,7 @@ export default function Register() {
                         className="w-full pl-10 pr-10 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                         value={formData.password}
                         onChange={handleChange}
-                        required
+                        
                       />
                       <button
                         type="button"
@@ -214,7 +256,7 @@ export default function Register() {
                         className="w-full pl-10 pr-10 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                         value={formData.confirmPassword}
                         onChange={handleChange}
-                        required
+                        
                       />
                       <button
                         type="button"

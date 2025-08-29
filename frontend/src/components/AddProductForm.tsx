@@ -2,11 +2,13 @@ import React, { useState, useRef } from 'react';
 import { CreateProductRequest, FormErrors } from '@/types/product';
 
 
+
 interface AddProductFormProps {
+  productId?: string;
   onProductAdded?: () => void;
 }
 
-const AddProductForm: React.FC<AddProductFormProps> = ({ onProductAdded }) => {
+const AddProductForm: React.FC<AddProductFormProps> = ({ productId, onProductAdded }) => {
   const [formData, setFormData] = useState<CreateProductRequest>({
     name: '',
     price: 0,
@@ -17,6 +19,30 @@ const AddProductForm: React.FC<AddProductFormProps> = ({ onProductAdded }) => {
   const [message, setMessage] = useState<string>('');
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  React.useEffect(() => {
+    if (productId) {
+      fetch(`http://localhost:3001/api/products/${productId}`)
+        .then(res => {
+          if (!res.ok) throw new Error('Failed to fetch product');
+          return res.json();
+        })
+        .then(data => {
+          const product = data.data;
+          setFormData({
+            name: product.name || '',
+            price: product.price || 0,
+            description: product.description || '',
+          });
+          if (product.imageUrl) {
+            setImagePreview(product.imageUrl);
+          }
+        })
+        .catch(() => {
+          setMessage('Failed to load product data for editing.');
+        });
+    }
+  }, [productId]);
 
   const validateForm = (): boolean => {
     const newErrors: FormErrors = {};
@@ -50,26 +76,29 @@ const AddProductForm: React.FC<AddProductFormProps> = ({ onProductAdded }) => {
       if (formData.image) {
         formDataToSend.append('image', formData.image);
       }
-      const res = await fetch('http://localhost:3001/api/products',{
-        method:"POST",
+      const method = productId ? 'PUT' : 'POST';
+      const url = productId ? `http://localhost:3001/api/products/${productId}` : 'http://localhost:3001/api/products';
+      const res = await fetch(url, {
+        method,
         body: formDataToSend,
       });
-      if(res.ok){
-
+      if (res.ok) {
         setFormData({ name: '', price: 0, description: '' });
         setImagePreview(null);
         if (fileInputRef.current) {
           fileInputRef.current.value = '';
         }
-        setMessage('Product added successfully!');
+        setMessage(productId ? 'Product updated successfully!' : 'Product added successfully!');
         window.location.href = '/profile';
         if (onProductAdded) {
           onProductAdded();
         }
+      } else {
+        setMessage('Failed to save product. Please try again.');
       }
     } catch (error) {
-      setMessage('Error adding product. Please try again.');
-    } 
+      setMessage('Error saving product. Please try again.');
+    }
     setIsSubmitting(false);
   };
 
@@ -117,7 +146,7 @@ const AddProductForm: React.FC<AddProductFormProps> = ({ onProductAdded }) => {
 
   return (
     <div className="p-4">
-      <h2 className="text-2xl font-bold mb-4">Add New Product</h2>
+      <h2 className="text-2xl font-bold mb-4">{productId ? 'Edit Product' : 'Add New Product'}</h2>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label htmlFor="name" className="block text-sm font-medium text-gray-700">
@@ -208,7 +237,7 @@ const AddProductForm: React.FC<AddProductFormProps> = ({ onProductAdded }) => {
           disabled={isSubmitting}
           className="w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50"
         >
-          {isSubmitting ? 'Adding Product...' : 'Add Product'}
+          {isSubmitting ? (productId ? 'Updating Product...' : 'Adding Product...') : (productId ? 'Update Product' : 'Add Product')}
         </button>
 
         {message && (

@@ -34,12 +34,9 @@ export default function LoginPage() {
       console.log("checking data ::: ",data);
       
       if (response.ok) {
-        // Store token and user data
         localStorage.setItem('token', data.token);
         localStorage.setItem('user', JSON.stringify(data.user));
         localStorage.setItem('isAuthenticated', 'true');
-        
-        // Redirect to products page on successful login
         window.location.href = '/profile';
       } else {
         setError(data.message || 'Login failed');

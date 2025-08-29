@@ -74,6 +74,21 @@ router.get('/', async (req: Request, res : Response)=>{
     }
 })
 
+// GET single product by ID
+router.get('/:id', async (req: Request, res: Response) => {
+    try {
+        const { id } = req.params;
+        const product = await Products.findById(id);
+        if (!product) {
+            return res.status(404).json({ message: "Product not found" });
+        }
+        res.json({ data: product });
+    } catch (err) {
+        console.error("Get product error:", err);
+        res.status(500).json({ message: "Server error" });
+    }
+});
+
 router.delete("/:id", async (req, res) => {
   const { id } = req.params;
   try {
@@ -85,6 +100,39 @@ router.delete("/:id", async (req, res) => {
     res.json({ message: "Product deleted successfully" });
   } catch (err) {
     console.error("Delete product error:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+router.put("/:id", upload.single('image'), async (req, res) => {
+  const { id } = req.params;
+  try {
+    const { name, price, description } = req.body;    
+    if (!name || !price) {
+      return res.status(400).json({ message: "Missing required fields" });
+    }
+    const updateData: any = {
+      name,
+      price,
+      description
+    };
+    if (req.file) {
+      updateData.imagePath = `/uploads/${req.file.filename}`;
+    }
+    const updatedProduct = await Products.findByIdAndUpdate(
+      id,
+      updateData,
+      { new: true, runValidators: true }
+    );
+    if (!updatedProduct) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+    res.json({
+      message: "Product updated successfully",
+      data: updatedProduct,
+    });
+  } catch (err: any) {
+    console.error("Update product error:", err);
     res.status(500).json({ message: "Server error" });
   }
 });

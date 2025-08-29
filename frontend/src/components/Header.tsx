@@ -1,12 +1,14 @@
 'use client';
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Menu, X } from 'lucide-react'; // Importing icons from lucide-react
+import { Menu, X } from 'lucide-react'; 
+import { useRouter } from 'next/navigation';
 
 const Header: React.FC = () => {
   const [user, setUser] = useState({});
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const router = useRouter()
   useEffect(() => {
     const authStatus = localStorage.getItem('isAuthenticated');
     setIsAuthenticated(authStatus === 'true');
@@ -19,7 +21,7 @@ const Header: React.FC = () => {
   const handleLogout = () => {
     localStorage.removeItem('isAuthenticated');
     setIsAuthenticated(false);
-    window.location.href = '/';
+    router.push("/")
   };
 
   return (

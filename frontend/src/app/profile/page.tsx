@@ -2,11 +2,13 @@
 
 import React, { useState, useEffect } from 'react';
 import { Product } from '@/types/product';
+import { useRouter } from 'next/navigation';
 
 export default function ProfilePage() {
   const [user, setUser] = useState({});
   const [products, setProducts] = useState<Product[]>([]);
   const [error, setError] = useState('');
+  const router = useRouter();
   
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
@@ -22,7 +24,7 @@ export default function ProfilePage() {
       const res = await fetch("http://localhost:3001/api/products");
       if (!res.ok) throw new Error("Failed to fetch products");
       const data = await res.json();
-      setProducts(data.data); // assuming your API returns an array of products
+      setProducts(data.data);
     } catch (err) {
       console.error(err);
     }
@@ -36,6 +38,10 @@ export default function ProfilePage() {
         fetchProducts()
       }).catch((err) => console.error(err));
   };
+
+  const handleEditProduct = (id: string) => {
+    router.push(`/products?id=${id}`)
+  }
 
   if (!user) {
     window.location.href = "/login";
@@ -125,7 +131,7 @@ export default function ProfilePage() {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <button
-                          // onClick={() => handleEditProduct(product)}
+                          onClick={() => handleEditProduct(product._id)}
                           className="text-blue-600 hover:text-blue-900 mr-4"
                         >
                           Edit
