@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { CreateProductRequest, FormErrors } from '@/types/product';
+import { X } from 'lucide-react';
 
 
 
@@ -226,7 +227,7 @@ const AddProductForm: React.FC<AddProductFormProps> = ({ productId, onProductAdd
                 onClick={removeImage}
                 className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs"
               >
-                ×
+                <X />
               </button>
             </div>
           )}

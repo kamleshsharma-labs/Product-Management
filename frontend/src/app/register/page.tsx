@@ -3,9 +3,9 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Eye, EyeOff, Mail, Lock, User, Phone, Calendar, Shield, Home, Heart } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock, User, Phone, Calendar } from 'lucide-react';
 
-export default function Register() {
+const Register =()=>{
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -141,7 +141,6 @@ export default function Register() {
   return (
     <main className="min-h-screen bg-gray-50">
       <div className="grid lg:grid-cols-2 min-h-screen">
-        {/* Left Side - Insurance Clip Art & Info */}
         <div className="hidden lg:flex flex-col items-center justify-center bg-white p-12">
           <div className="max-w-md text-center">
             <h2 className="text-3xl font-semibold text-gray-900 mb-4">Create Your Account</h2>
@@ -152,8 +151,6 @@ export default function Register() {
             </div>
           </div>
         </div>
-
-        {/* Right Side - Registration Form */}
         <div className="flex items-center justify-center p-8">
           <div className="w-full max-w-2xl">
             <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
@@ -395,3 +392,4 @@ export default function Register() {
     </main>
   );
 }
+export default Register

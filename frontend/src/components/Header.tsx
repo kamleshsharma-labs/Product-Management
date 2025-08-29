@@ -4,6 +4,24 @@ import Link from 'next/link';
 import { Menu, X } from 'lucide-react'; 
 import { useRouter } from 'next/navigation';
 
+const Avatar = ({ user })=>{
+  return (
+    <Link href="/profile">
+      {user.imageUrl ? (
+        <img
+          src={user.imageUrl}
+          alt={user.firstName}
+          className="w-10 h-10 rounded-full object-cover cursor-pointer hover:opacity-80 transition"
+        />
+      ) : (
+        <div className="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center text-gray-700 font-semibold cursor-pointer hover:bg-gray-400 transition">
+          {user.firstName?.charAt(0).toUpperCase()}
+        </div>
+      )}
+    </Link>
+  );
+}
+
 const Header: React.FC = () => {
   const [user, setUser] = useState({});
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -30,17 +48,15 @@ const Header: React.FC = () => {
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center">
             <Link href="/" className="text-2xl font-bold text-blue-600">
-              ProductHub
+            ProductCatalog
             </Link>
           </div>
-
-          {/* Desktop Navigation */}
           <nav className="hidden md:flex space-x-8">
             <Link href="/" className="text-gray-700 hover:text-blue-600 px-3 py-2">
               Home
             </Link>
             <Link href="/products-public" className="text-gray-700 hover:text-blue-600 px-3 py-2">
-              Products
+              All Products
             </Link>
             {isAuthenticated && (
               <>
@@ -53,19 +69,20 @@ const Header: React.FC = () => {
               </>
             )}
           </nav>
-
-          {/* Auth Buttons for Desktop */}
           <div className="hidden md:flex items-center space-x-4">
             {isAuthenticated ? (
-              <>
-                <span className="text-gray-700">Welcome! {user.firstName}</span>
-                <button
-                  onClick={handleLogout}
-                  className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700"
-                >
-                  Logout
-                </button>
-              </>
+             <>
+             <div className="flex items-center space-x-4">
+             <Avatar user={user} />
+               <span className="text-gray-700">{user.firstName}</span>
+               <button
+                 onClick={handleLogout}
+                 className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700"
+               >
+                 Logout
+               </button>
+             </div>
+           </>
             ) : (
               <>
                 <Link
@@ -84,15 +101,12 @@ const Header: React.FC = () => {
             )}
           </div>
 
-          {/* Hamburger Menu for Mobile */}
           <div className="md:hidden">
             <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="text-gray-700 p-3 text-2xl hover:bg-gray-100 rounded-md transition-colors" aria-label="Toggle menu">
               {isMenuOpen ? <X /> : <Menu />}
             </button>
           </div>
         </div>
-
-        {/* Mobile Menu Dropdown */}
         {isMenuOpen && (
           <div className="md:hidden">
             <div className="px-2 pt-2 pb-3 space-y-1 bg-white border-t">
@@ -110,7 +124,7 @@ const Header: React.FC = () => {
                   <Link href="/profile" className="block px-3 py-2 text-gray-700 hover:text-blue-600">
                     Profile
                   </Link>
-                  <span className="block px-3 py-2 text-gray-700">Welcome!</span>
+                  <span className="block px-3 py-2 text-gray-700">Welcome! {user.firstName} </span>
                   <button onClick={handleLogout} className="block w-full text-left px-3 py-2 text-red-600 hover:text-red-700">
                     Logout
                   </button>

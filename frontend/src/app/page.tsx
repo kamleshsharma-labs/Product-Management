@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Package, Zap, Shield, TrendingUp, Clock, Headphones } from 'lucide-react';
 
-export default function Home() {
+const Home=()=>{
   const [currentFeature, setCurrentFeature] = useState(0);
   const features = [
     {
@@ -45,7 +45,7 @@ export default function Home() {
             <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 mb-6 animate-fade-in">
               Welcome to{' '}
               <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                ProductHub
+              ProductCatalog
               </span>
             </h1>
             
@@ -95,14 +95,10 @@ export default function Home() {
             </div>
           </div>
         </div>
-
-        {/* Floating Elements */}
         <div className="absolute top-20 left-10 w-20 h-20 bg-blue-100 rounded-full animate-float-1"></div>
         <div className="absolute top-40 right-20 w-16 h-16 bg-purple-100 rounded-full animate-float-2"></div>
         <div className="absolute bottom-20 left-20 w-12 h-12 bg-blue-200 rounded-full animate-float-3"></div>
       </div>
-
-      {/* Stats Section */}
       <div className="bg-gray-50 py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
@@ -121,8 +117,6 @@ export default function Home() {
           </div>
         </div>
       </div>
-
-      {/* Additional CTA */}
       <div className="py-20 text-center bg-white">
         <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
           Ready to Transform Your Product Management?
@@ -137,3 +131,4 @@ export default function Home() {
     </div>
   );
 }
+export default Home

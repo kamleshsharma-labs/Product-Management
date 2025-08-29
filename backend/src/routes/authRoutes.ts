@@ -132,4 +132,43 @@ router.get('/profile', async (req: Request, res: Response) => {
   }
 });
 
+// Update user profile
+router.put('/profile', async (req: Request, res: Response) => {
+  const token = req.headers.authorization?.split(' ')[1];
+  if (!token) {
+    return res.status(401).json({ message: 'No token provided' });
+  }
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret') as any;
+    const user = await User.findById(decoded.userId); 
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    const { firstName, lastName, phone, dateOfBirth, country, state } = req.body;
+    if (firstName !== undefined) user.firstName = firstName;
+    if (lastName !== undefined) user.lastName = lastName;
+    if (phone !== undefined) user.phone = phone;
+    if (dateOfBirth !== undefined) user.dateOfBirth = dateOfBirth;
+    if (country !== undefined) user.country = country;
+    if (state !== undefined) user.state = state;
+    await user.save();
+    res.json({
+      message: 'Profile updated successfully',
+      user: {
+        id: user._id,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        phone: user.phone,
+        country: user.country,
+        state: user.state,
+        dateOfBirth: user.dateOfBirth
+      }
+    });
+  } catch (error) {
+    console.error('Profile update error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 export default router;
